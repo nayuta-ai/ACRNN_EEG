@@ -67,7 +67,6 @@ labels = torch.from_numpy(labels).clone()
 # data Hight Windowsize Channel 
 datasets = datasets.permute(0,3,1,2)
 
-"""
 map, a = channel_wise_attention(datasets)
 print(map.shape)
 print(a.shape)
@@ -76,4 +75,3 @@ print(b.shape)
 h,c = lstm(b)
 print(h.shape)
 print(c.shape)
-"""
