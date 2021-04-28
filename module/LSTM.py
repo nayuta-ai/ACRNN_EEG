@@ -16,8 +16,8 @@ class LSTM(nn.Module):
     def forward(self,x,hidden0=None):
         x = x.reshape(-1,1,1080)
         q ,(hidden,cell) = self.lstm(x)
-        h = hidden[1]
-        c = cell[1]
+        h = hidden[1].reshape(-1,1,64)
+        c = cell[1].reshape(-1,1,64)
         return h,c
 
 model = LSTM(64)
