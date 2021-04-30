@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class CNN(nn.Module):
     def __init__(self,ic,ih,iw,kh,kw,ks,ph,pw,ps,oc):
-        super().__init__()
+        super(CNN,self).__init__()
         # input
         self.input_channel = ic
         self.input_height =  ih
@@ -30,6 +30,7 @@ class CNN(nn.Module):
         cd = self.dropout(c)
         return cd
 
+"""
 a = torch.randn(800,1,384,32)
 # input 
 input_channel_num = 1
@@ -48,3 +49,4 @@ pooling_stride = 10
 cnn = CNN(input_channel_num,input_height,input_width,kernel_height,kernel_width,kernel_stride,pooling_height,pooling_width,pooling_stride,conv_channel_num)
 b = cnn(a)
 print(b.shape)
+"""
