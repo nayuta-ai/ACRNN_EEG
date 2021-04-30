@@ -2,9 +2,12 @@ import numpy as np
 import pandas as pd
 import pickle
 import torch
+import torch.nn as nn
 from module.channel_wise_attention import channel_wise_attention
 from module.CNN import CNN
 from module.LSTM import LSTM
+from module.self_attention import self_attention
+import torch.optim as optim
 
 def deap_preprocess(data_file,emotion):
     dataset_extention = ".mat_win_384_dataset.pkl"
@@ -56,7 +59,33 @@ print(cnn)
 # LSTM
 n_hidden_state = 64
 lstm = LSTM(n_hidden_state)
-print(LSTM)
+print(lstm)
+
+# self attention
+attention_size = 512
+self_attention = self_attention(n_hidden_state,attention_size)
+print(self_attention)
+
+# softmax
+softmax = nn.Sequential(
+    nn.Linear(n_hidden_state,num_labels),
+    nn.Softmax(dim=1)
+)
+print(softmax)
+
+# loss, algorithm
+learning_rate = 1e-4
+"""
+params = []
+params.append(channel_wise_attention.parameters())
+params.append(cnn.parameters())
+params.append(lstm.parameters())
+params.append(self_attention.parameters())
+params.append(softmax.parameters())
+params = torch.cat(params).reshape(len(params),params[0].shape)
+loss = nn.CrossEntropyLoss()
+optimizer = optim.Adam(params,lr=learning_rate)
+"""
 # dataset_deap
 deap_subjects = ['s01', 's02', 's03', 's04', 's05', 's06', 's07', 's08', 's09', 's10', 's11','s12', 's13','s14','s15', 's16', 's17','s18', 's19', 's20',
  's21', 's22', 's23', 's24', 's25', 's26','s27', 's28', 's29', 's30', 's31', 's32']
@@ -75,3 +104,9 @@ print(b.shape)
 h,c = lstm(b)
 print(h.shape)
 print(c.shape)
+d = self_attention(h)
+print(d.shape)
+p = softmax(d)
+print(p.shape)
+prediction = torch.argmax(p,dim=1)
+print(prediction.shape)
