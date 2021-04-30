@@ -17,7 +17,7 @@ class dense(nn.Module):
 
 class self_attention(nn.Module):
     def __init__(self,input_dim,hidden_dim):
-        super().__init__()
+        super(self_attention,self).__init__()
         self.q = input_dim
         self.k = input_dim
         self.hidden = hidden_dim

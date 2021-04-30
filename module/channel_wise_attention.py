@@ -3,7 +3,7 @@ import torch
 
 class channel_wise_attention(nn.Module):
     def __init__(self,H,W,C,reduce):
-        super().__init__()
+        super(channel_wise_attention,self).__init__()
         self.H = H
         self.W = W
         self.C = C

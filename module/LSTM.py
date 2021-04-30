@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class LSTM(nn.Module):
     def __init__(self,hidden_dim):
-        super().__init__()
+        super(LSTM,self).__init__()
         self.hidden_dim = hidden_dim
         # lstm
         self.lstm = nn.LSTM(
@@ -20,8 +20,10 @@ class LSTM(nn.Module):
         c = cell[1].reshape(-1,1,64)
         return h,c
 
+"""
 model = LSTM(64)
 a = torch.randn(800,1080)
 b ,c= model(a)
 print(b.shape)
 print(c.shape)
+"""
