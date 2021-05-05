@@ -93,7 +93,8 @@ if __name__ == '__main__':
             # print(device)
 
             # set train batch number per epoch
-            batch_num_epoch = train_x.shape[0]//batch_size
+            batch_num_epoch_train = train_x.shape[0]//batch_size
+            batch_num_epoch_test = test_x.shape[0]//batch_size
             train_acc = []
             test_acc = []
             train_loss = []
@@ -105,7 +106,7 @@ if __name__ == '__main__':
                 batch_train_loss = []
                 # training process
                 model.train(True)
-                for batch in range(batch_num_epoch):
+                for batch in range(batch_num_epoch_train):
                     offset = (batch*batch_size%(train_y.shape[0]-batch_size))
                     batch_x = train_x[offset:(offset+batch_size),:,:,:]
                     batch_x = batch_x.reshape(len(batch_x),1,window_size,n_channel)
@@ -115,16 +116,19 @@ if __name__ == '__main__':
                     # print(batch_y.shape)
                     optimizer.zero_grad()
                     output = model(batch_x)
-                    print(output.shape)
+                    # print(output.shape)
                     # print(output.shape)
                     # target = torch.empty(batch_size,dtype=torch.long).random_(2) # 修正必要
                     loss = loss_function(output,batch_y)
                     batch_train_loss.append(loss.item())
                     # print(batch_train_loss)
+                    pred_train = output.argmax(dim=1,keepdim=True)
+                    # print(pred_train)
+                    correct_train += (pred_train == batch_y).sum().item()
+                    # print(correct_train)
                     loss.backward()
                     optimizer.step()
-                    pred_train = output.argmax(dim=1,keepdim=True)
-                    correct_train += (pred_train == batch_y).sum().item()
+                    
                 print('Training log: {} epoch. Loss: {}'.format(epoch+1,loss.item()))
                 train_loss.append(loss.item())
                 train_acc.append(correct_train/batch_size)
@@ -135,16 +139,16 @@ if __name__ == '__main__':
                 test_loss = 0
                 correct_test = 0
                 with torch.no_grad():
-                    for batch in range(batch_num_epoch):
-                        offset = (batch*batch_size%(train_y.shape[0]-batch_size))
+                    for batch in range(batch_num_epoch_test):
+                        offset = (batch*batch_size%(test_y.shape[0]-batch_size))
                         batch_x = test_x[offset:(offset+batch_size),:,:,:]
                         batch_x = batch_x.reshape(len(batch_x),1,window_size,n_channel)
                         output = model(batch_x)
-                        print(output.shape)
+                        # print(output.shape)
                         batch_y = test_y[offset:(offset+batch_size)]
                         test_loss += loss_function(output,batch_y).item()
                         pred_test = output.argmax(dim=1,keepdim=True)
                         correct_test += (pred_test == batch_y).sum().item()
                 test_acc.append(correct_test/batch_size)
-                test_loss.append(test_loss/batch_size)
-                print('Train Accuracy: {}. Test Accuracy: {}'.format(correct_train,correct_test))
+                test_loss += np.mean(test_loss)
+                print('Train Accuracy: {}. Test Accuracy: {}'.format(correct_train/batch_size,correct_test/batch_size))
