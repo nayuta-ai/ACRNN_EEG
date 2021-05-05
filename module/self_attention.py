@@ -43,7 +43,6 @@ class self_attention(nn.Module):
         A = A.reshape(-1,self.k)
         A = self.dropout(A)
         return A
-
 """
 input_dim = 64
 output_dim = 512
