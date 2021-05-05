@@ -27,8 +27,8 @@ class ACRNN(nn.Module):
         self.hidden = attention_size
         self.self_attention = self_attention(self.hidden_dim,self.hidden)
         self.softmax = nn.Sequential(
-            nn.Linear(n_hidden_state,num_labels),
-            nn.Softmax(dim=1)
+            nn.Linear(n_hidden_state,1),
+            nn.Softmax(dim=0)
         )
     def forward(self,x):
         x_map, x_ca = self.channel_wise_attention(x)
@@ -67,9 +67,7 @@ n_hidden_state = 64
 # self attention
 attention_size = 512
 
-"""
 a = torch.randn(800,1,384,32)
 acrnn = ACRNN(input_channel_num,input_width,input_height,k,kernel_height,kernel_width,kernel_stride,pooling_height,pooling_width,pooling_stride,conv_channel_num,n_hidden_state,attention_size)
 b = acrnn(a)
 print(b)
-"""
