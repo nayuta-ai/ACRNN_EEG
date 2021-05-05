@@ -43,10 +43,11 @@ class self_attention(nn.Module):
         A = A.reshape(-1,self.k)
         A = self.dropout(A)
         return A
-
+"""
 input_dim = 64
 output_dim = 512
 model = self_attention(64,512)
 a = torch.randn(800,1,64)
 b = model(a)
 print(b.shape)
+"""

@@ -67,8 +67,9 @@ n_hidden_state = 64
 # self attention
 attention_size = 512
 
-
+"""
 a = torch.randn(800,1,384,32)
 acrnn = ACRNN(input_channel_num,input_width,input_height,k,kernel_height,kernel_width,kernel_stride,pooling_height,pooling_width,pooling_stride,conv_channel_num,n_hidden_state,attention_size)
 b = acrnn(a)
 print(b)
+"""
