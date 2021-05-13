@@ -31,7 +31,7 @@ https://zenodo.org/record/546113#.YIb00n2mMTU
 
 ## Training
 ```
-pyhon ACRNN.py
+pyhon main.py
 ```
 
 
