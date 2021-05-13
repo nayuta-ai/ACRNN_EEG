@@ -3,7 +3,9 @@ import pandas as pd
 import pickle
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 
+from graph import *
 from ACRNN import ACRNN
 import torch.optim as optim
 
@@ -29,7 +31,7 @@ def deap_preprocess(data_file,emotion):
 if __name__ == '__main__':
     # parameter
     ## training
-    training_epochs = 1
+    training_epochs = 5
     batch_size = 10
     emotion = "arousal"
     # deap_subjects = ['s01', 's02', 's03', 's04', 's05', 's06', 's07', 's08', 's09', 's10', 's11','s12', 's13','s14','s15', 's16', 's17','s18', 's19', 's20','s21', 's22', 's23', 's24', 's25', 's26','s27', 's28', 's29', 's30', 's31', 's32']
@@ -55,7 +57,7 @@ if __name__ == '__main__':
         # print(labels)
         # data Hight Windowsize Channel 
         datasets = datasets.permute(0,3,1,2)
-        fold = 10
+        fold = 2
         test_accuracy_all_fold = np.zeros(shape=[0],dtype=float)
         # fold '0-9'
         for curr_fold in range(fold):
@@ -136,7 +138,9 @@ if __name__ == '__main__':
                         correct_test += (pred_test == batch_y).sum().item()
                 avg_loss_test = loss_test_total/batch_num_epoch_test
                 avg_acc_test = correct_test/batch_num_epoch_test
-                test_acc.append(avg_loss_test)
-                test_loss.append(avg_acc_test)
+                test_acc.append(avg_acc_test)
+                test_loss.append(avg_loss_test)
                 print('Train Loss: {}. Train Accuracy {}.'.format(avg_loss_train,avg_acc_train))
                 print('Test Loss: {}. Test Accuracy: {}.'.format(avg_loss_test,avg_acc_test))
+            loss_graph(train_loss,test_loss,curr_fold)
+            acc_graph(train_acc,test_acc,curr_fold)
