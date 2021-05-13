@@ -37,30 +37,13 @@ if __name__ == '__main__':
     ## EEG sample
     window_size = 384
     n_channel = 32
-    ## input
-    input_channel_num = 1
-    input_height = 32
-    input_width = 384
-    num_labels = 2
-    ## channel wise attention
-    k = 15
-    ## conv
-    kernel_height = 32
-    kernel_width = 45
-    kernel_stride = 1
-    conv_channel_num = 40
-    ## pooling
-    pooling_height = 1
-    pooling_width = 75
-    pooling_stride = 10
-    ## LSTM
-    n_hidden_state = 64
-    ## self attention
-    attention_size = 512
     ## loss
     learning_rate = 1e-4
+    # gpu setting
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # network
-    model = ACRNN(input_channel_num,input_width,input_height,k,kernel_height,kernel_width,kernel_stride,pooling_height,pooling_width,pooling_stride,conv_channel_num,n_hidden_state,attention_size)
+    model = ACRNN(n_channel)
+    model.to(device)
     optimizer = torch.optim.Adam(params=model.parameters(),lr=learning_rate)
     loss_function = nn.CrossEntropyLoss()
 
@@ -88,9 +71,6 @@ if __name__ == '__main__':
             split = np.array(split)
             train_x = datasets[split]
             train_y = labels[split]
-            # gpu setting
-            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-            # print(device)
 
             # set train batch number per epoch
             batch_num_epoch_train = train_x.shape[0]//batch_size
@@ -103,6 +83,7 @@ if __name__ == '__main__':
             for epoch in range(training_epochs):
                 loss = None
                 correct_train = 0
+                loss_train_total = 0
                 batch_train_loss = []
                 # training process
                 model.train(True)
@@ -112,6 +93,8 @@ if __name__ == '__main__':
                     batch_x = batch_x.reshape(len(batch_x),1,window_size,n_channel)
                     # print(batch_x.shape)
                     batch_y = train_y[offset:(offset+batch_size)]
+                    batch_x = batch_x.to(device)
+                    batch_y = batch_y.to(device)
                     # print(batch_y)
                     # print(batch_y.shape)
                     optimizer.zero_grad()
@@ -120,35 +103,40 @@ if __name__ == '__main__':
                     # print(output.shape)
                     # target = torch.empty(batch_size,dtype=torch.long).random_(2) # 修正必要
                     loss = loss_function(output,batch_y)
-                    batch_train_loss.append(loss.item())
-                    # print(batch_train_loss)
+                    batch_train_loss.append(loss.item())  
                     pred_train = output.argmax(dim=1,keepdim=True)
-                    # print(pred_train)
+                    loss_train_total += loss.item()
                     correct_train += (pred_train == batch_y).sum().item()
-                    # print(correct_train)
                     loss.backward()
                     optimizer.step()
                     
-                print('Training log: {} epoch. Loss: {}'.format(epoch+1,loss.item()))
-                train_loss.append(loss.item())
-                train_acc.append(correct_train/batch_size)
+                avg_loss_train = loss_train_total/batch_num_epoch_train
+                avg_acc_train = correct_train/batch_num_epoch_train
+                print('Training log: {} fold. {} epoch. Loss: {}'.format(curr_fold+1,epoch+1,avg_loss_train))
+                train_loss.append(avg_loss_train)
+                train_acc.append(avg_acc_train)
                 # print(train_loss)
 
                 # test process
                 model.eval()
-                test_loss = 0
+                loss_test_total = 0
                 correct_test = 0
                 with torch.no_grad():
                     for batch in range(batch_num_epoch_test):
                         offset = (batch*batch_size%(test_y.shape[0]-batch_size))
                         batch_x = test_x[offset:(offset+batch_size),:,:,:]
                         batch_x = batch_x.reshape(len(batch_x),1,window_size,n_channel)
-                        output = model(batch_x)
                         # print(output.shape)
                         batch_y = test_y[offset:(offset+batch_size)]
-                        test_loss += loss_function(output,batch_y).item()
+                        batch_x = batch_x.to(device)
+                        batch_y = batch_y.to(device)
+                        output = model(batch_x)
+                        loss_test_total += loss_function(output,batch_y).item()
                         pred_test = output.argmax(dim=1,keepdim=True)
                         correct_test += (pred_test == batch_y).sum().item()
-                test_acc.append(correct_test/batch_size)
-                test_loss += np.mean(test_loss)
-                print('Train Accuracy: {}. Test Accuracy: {}'.format(correct_train/batch_size,correct_test/batch_size))
+                avg_loss_test = loss_test_total/batch_num_epoch_test
+                avg_acc_test = correct_test/batch_num_epoch_test
+                test_acc.append(avg_loss_test)
+                test_loss.append(avg_acc_test)
+                print('Train Loss: {}. Train Accuracy {}.'.format(avg_loss_train,avg_acc_train))
+                print('Test Loss: {}. Test Accuracy: {}.'.format(avg_loss_test,avg_acc_test))

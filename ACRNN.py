@@ -7,28 +7,29 @@ from module.LSTM import LSTM
 from module.self_attention import self_attention
 
 class ACRNN(nn.Module):
-    def __init__(self,input_channel_num,input_width,input_height,k,kh,kw,ks,ph,pw,ps,oc,hidden_dim,attention_size):
+    def __init__(self,input_height):
         super(ACRNN,self).__init__()
-        self.H = input_channel_num
-        self.W = input_width
+        self.H = 1
+        self.W = 384
         self.C = input_height
-        self.reduce = k
+        self.reduce = 15
         self.channel_wise_attention = channel_wise_attention(self.H,self.W,self.C,self.reduce)
-        self.output_channel = oc
-        self.kernel_height = kh
-        self.kernel_width = kw
-        self.kernel_stride = ks
-        self.pooling_height = ph
-        self.pooling_width = pw
-        self.pooling_stride = ps
+        self.output_channel = 40
+        self.kernel_height = 32
+        self.kernel_width = 45
+        self.kernel_stride = 1
+        self.pooling_height = 1
+        self.pooling_width = 75
+        self.pooling_stride = 10
         self.cnn = CNN(self.H,self.C,self.W,self.kernel_height,self.kernel_width,self.kernel_stride,self.pooling_height,self.pooling_width,self.pooling_stride,self.output_channel)
-        self.hidden_dim = hidden_dim
+        self.hidden_dim = 64
         self.lstm = LSTM(self.hidden_dim)
-        self.hidden = attention_size
+        self.hidden = 512
         self.self_attention = self_attention(self.hidden_dim,self.hidden)
+        self.num_labels = 2
         self.softmax = nn.Sequential(
-            nn.Linear(n_hidden_state,1),
-            nn.Softmax(dim=0)
+            nn.Linear(self.hidden_dim,self.num_labels),
+            nn.Softmax(dim=1)
         )
     def forward(self,x):
         x_map, x_ca = self.channel_wise_attention(x)
@@ -39,35 +40,11 @@ class ACRNN(nn.Module):
         return x_sm
 
 # EEG sample
-window_size = 384
 n_channel = 32
-# input
-input_channel_num = 1
-input_height = 32
-input_width = 384
-num_labels = 2
 
-# channel wise attention
-k = 15
-
-# CNN
-## conv
-kernel_height = 32
-kernel_width = 45
-kernel_stride = 1
-conv_channel_num = 40
-## pooling
-pooling_height = 1
-pooling_width = 75
-pooling_stride = 10
-
-# LSTM
-n_hidden_state = 64
-
-# self attention
-attention_size = 512
-
+"""
 a = torch.randn(800,1,384,32)
-acrnn = ACRNN(input_channel_num,input_width,input_height,k,kernel_height,kernel_width,kernel_stride,pooling_height,pooling_width,pooling_stride,conv_channel_num,n_hidden_state,attention_size)
+acrnn = ACRNN(n_channel)
 b = acrnn(a)
 print(b)
+"""
