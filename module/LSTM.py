@@ -19,11 +19,3 @@ class LSTM(nn.Module):
         h = hidden[1].reshape(-1,1,64)
         c = cell[1].reshape(-1,1,64)
         return h,c
-
-"""
-model = LSTM(64)
-a = torch.randn(800,1080)
-b ,c= model(a)
-print(b.shape)
-print(c.shape)
-"""

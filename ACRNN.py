@@ -6,6 +6,7 @@ from module.CNN import CNN
 from module.LSTM import LSTM
 from module.self_attention import self_attention
 
+
 class ACRNN(nn.Module):
     def __init__(self,input_height):
         super(ACRNN,self).__init__()
@@ -38,13 +39,3 @@ class ACRNN(nn.Module):
         x_sa = self.self_attention(x_rn)
         x_sm = self.softmax(x_sa)
         return x_sm
-
-# EEG sample
-n_channel = 32
-
-"""
-a = torch.randn(800,1,384,32)
-acrnn = ACRNN(n_channel)
-b = acrnn(a)
-print(b)
-"""

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from graph import *
 from ACRNN import ACRNN
+from torch.autograd import Variable
 import torch.optim as optim
 
 def deap_preprocess(data_file,emotion):
@@ -31,7 +32,7 @@ def deap_preprocess(data_file,emotion):
 if __name__ == '__main__':
     # parameter
     ## training
-    training_epochs = 5
+    training_epochs = 1000
     batch_size = 10
     emotion = "arousal"
     # deap_subjects = ['s01', 's02', 's03', 's04', 's05', 's06', 's07', 's08', 's09', 's10', 's11','s12', 's13','s14','s15', 's16', 's17','s18', 's19', 's20','s21', 's22', 's23', 's24', 's25', 's26','s27', 's28', 's29', 's30', 's31', 's32']
@@ -57,8 +58,12 @@ if __name__ == '__main__':
         # print(labels)
         # data Hight Windowsize Channel 
         datasets = datasets.permute(0,3,1,2)
-        fold = 2
+        fold = 10
         test_accuracy_all_fold = np.zeros(shape=[0],dtype=float)
+        total_train_acc=[]
+        total_train_loss=[]
+        total_test_acc=[]
+        total_test_loss=[]
         # fold '0-9'
         for curr_fold in range(fold):
             fold_size = datasets.shape[0]//fold
@@ -97,10 +102,12 @@ if __name__ == '__main__':
                     batch_y = train_y[offset:(offset+batch_size)]
                     batch_x = batch_x.to(device)
                     batch_y = batch_y.to(device)
+                    batch_x = Variable(batch_x)
                     # print(batch_y)
                     # print(batch_y.shape)
                     optimizer.zero_grad()
                     output = model(batch_x)
+                    # print(output)
                     # print(output.shape)
                     # print(output.shape)
                     # target = torch.empty(batch_size,dtype=torch.long).random_(2) # 修正必要
@@ -142,5 +149,19 @@ if __name__ == '__main__':
                 test_loss.append(avg_loss_test)
                 print('Train Loss: {}. Train Accuracy {}.'.format(avg_loss_train,avg_acc_train))
                 print('Test Loss: {}. Test Accuracy: {}.'.format(avg_loss_test,avg_acc_test))
-            loss_graph(train_loss,test_loss,curr_fold)
-            acc_graph(train_acc,test_acc,curr_fold)
+                PATH='./param/model.pth'
+                torch.save(model.state_dict(),PATH)
+            total_train_acc.append(train_acc)
+            total_train_loss.append(train_loss)
+            total_test_acc.append(test_acc)
+            total_test_loss.append(test_loss)
+        loss_graph(total_train_loss,total_test_loss)
+        acc_graph(total_train_acc,total_test_acc)
+        with open("./data/train_loss.pickle",mode="wb") as f:
+            pickle.dump(total_train_loss,f)
+        with open("./data/test_loss.pickle",mode="wb") as f:
+            pickle.dump(total_test_loss,f)
+        with open("./data/train_acc.pickle",mode="wb") as f:
+            pickle.dump(total_train_acc,f)
+        with open("./data/test_acc.pickle",mode="wb") as f:
+            pickle.dump(total_test_acc,f)

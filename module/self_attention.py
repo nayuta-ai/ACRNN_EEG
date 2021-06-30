@@ -21,10 +21,10 @@ class self_attention(nn.Module):
         self.q = input_dim
         self.k = input_dim
         self.hidden = hidden_dim
-        self.dense = dense(self.q,self.k,self.hidden)
+        self.dense = dense(self.q,self.k,self.k)
         self.self_attention = nn.Sequential(
             nn.ELU(),
-            nn.Linear(self.hidden,self.k)
+            nn.Linear(self.k,self.k)
         )
         self.softmax = nn.Softmax(dim=2)
         self.dropout = nn.Dropout()
@@ -34,20 +34,12 @@ class self_attention(nn.Module):
         y = self.dense(x)
         # print(y.shape)
         z = self.self_attention(y)
-        # print(z.shape)
+        #print(z.shape)
         p = z * x
         p = self.softmax(p)
-        # print(p.shape)
+        #print(p.shape)
         A = p * x
-        # print(A.shape)
+        #print(A.shape)
         A = A.reshape(-1,self.k)
         A = self.dropout(A)
         return A
-"""
-input_dim = 64
-output_dim = 512
-model = self_attention(64,512)
-a = torch.randn(800,1,64)
-b = model(a)
-print(b.shape)
-"""
