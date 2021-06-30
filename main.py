@@ -155,8 +155,6 @@ if __name__ == '__main__':
             total_train_loss.append(train_loss)
             total_test_acc.append(test_acc)
             total_test_loss.append(test_loss)
-        loss_graph(total_train_loss,total_test_loss)
-        acc_graph(total_train_acc,total_test_acc)
         with open("./data/train_loss.pickle",mode="wb") as f:
             pickle.dump(total_train_loss,f)
         with open("./data/test_loss.pickle",mode="wb") as f:

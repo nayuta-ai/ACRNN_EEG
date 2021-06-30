@@ -35,7 +35,7 @@ def print_confusion_matrix(y_true,y_pred):
 
     plt.figure(figsize = (10,7))
     sns.heatmap(df_cmx, annot=True)
-    plt.savefig("confusion_matrix.png")
+    plt.savefig("./result/confusion_matrix.png")
     plt.show()
 
 

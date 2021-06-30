@@ -9,7 +9,7 @@ def loss_graph(train_loss,test_loss):
     plt.xticks(size=14)
     plt.yticks(size=14)
     plt.grid()
-    plt.savefig("loss_graph.png")
+    plt.savefig("./result/loss_graph.png")
     plt.show()
 
 def acc_graph(train_acc,test_acc):
@@ -21,5 +21,5 @@ def acc_graph(train_acc,test_acc):
     plt.xticks(size=14)
     plt.yticks(size=14)
     plt.grid()
-    plt.savefig("accuracy_graph.png")
+    plt.savefig("./result/accuracy_graph.png")
     plt.show()

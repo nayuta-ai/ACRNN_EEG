@@ -1,6 +1,7 @@
 import pickle
 from graph import loss_graph,acc_graph
 import matplotlib.pyplot as plt
+
 with open('./data/train_loss.pickle', "rb") as fp:
      train_loss= pickle.load(fp)
 total_train_loss=[]
@@ -32,7 +33,7 @@ plt.legend(fontsize=14)
 plt.xticks(size=14)
 plt.yticks(size=14)
 plt.grid()
-plt.savefig("loss_train_graph.png")
+plt.savefig("./result/loss_train_graph.png")
 plt.show()
 
 plt.figure(figsize=(8,6))
@@ -42,7 +43,7 @@ plt.legend(fontsize=14)
 plt.xticks(size=14)
 plt.yticks(size=14)
 plt.grid()
-plt.savefig("loss_test_graph.png")
+plt.savefig("./result/loss_test_graph.png")
 plt.show()
 
 plt.figure(figsize=(8,6))
@@ -52,7 +53,7 @@ plt.legend(fontsize=14)
 plt.xticks(size=14)
 plt.yticks(size=14)
 plt.grid()
-plt.savefig("acc_train_graph.png")
+plt.savefig("./result/acc_train_graph.png")
 plt.show()
 
 plt.figure(figsize=(8,6))
@@ -62,5 +63,8 @@ plt.legend(fontsize=14)
 plt.xticks(size=14)
 plt.yticks(size=14)
 plt.grid()
-plt.savefig("acc_test_graph.png")
+plt.savefig("./result/acc_test_graph.png")
 plt.show()
+
+loss_graph(total_train_loss,total_test_loss)
+acc_graph(total_train_acc,total_test_acc)
