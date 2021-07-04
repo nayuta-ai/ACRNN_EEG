@@ -42,4 +42,4 @@ class self_attention(nn.Module):
         #print(A.shape)
         A = A.reshape(-1,self.k)
         A = self.dropout(A)
-        return A
+        return p,A

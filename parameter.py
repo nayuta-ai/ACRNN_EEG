@@ -3,9 +3,7 @@ import pandas as pd
 import pickle
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix,accuracy_score
+from scipy.stats import rankdata
 from ACRNN import ACRNN,A_CRNN,CRNN_A
 
 def deap_preprocess(data_file,emotion):
@@ -27,18 +25,6 @@ def deap_preprocess(data_file,emotion):
     # print(type(labels))
     return datasets, labels
 
-def print_confusion_matrix(y_true,y_pred):
-    labels = sorted(list(set(y_true)))
-    cmx_data = confusion_matrix(y_true, y_pred, labels=labels)
-    
-    df_cmx = pd.DataFrame(cmx_data, index=labels, columns=labels)
-
-    plt.figure(figsize = (10,7))
-    sns.heatmap(df_cmx, annot=True)
-    plt.savefig("./result/confusion_matrix.png")
-    plt.show()
-
-
 datasets, labels = deap_preprocess("s01","arousal")
 datasets = torch.from_numpy(datasets).clone()
 datasets = datasets.permute(0,3,1,2)
@@ -47,12 +33,6 @@ n_channel=32
 model = ACRNN(n_channel)
 PATH='./param/model.pth'
 model.load_state_dict(torch.load(PATH))
-_,y_map,output = model(datasets)
-output = output.to('cpu').detach().numpy().copy()
-pred_test = np.argmax(output,axis=1)
-#print(y_map.shape)
-#print_confusion_matrix(labels,pred_test)
-print(accuracy_score(labels,pred_test)) # 0.98125
 model_A=CRNN_A(n_channel)
 A_model=A_CRNN(n_channel)
 model_A.state_dict()['cnn.conv.0.weight'][0:40]=model.state_dict()['cnn.conv.0.weight']
@@ -90,11 +70,3 @@ A_model.state_dict()['lstm.lstm.bias_ih_l1'][0:256]=model.state_dict()['lstm.lst
 A_model.state_dict()['lstm.lstm.bias_hh_l1'][0:256]=model.state_dict()['lstm.lstm.bias_hh_l1']
 A_model.state_dict()['softmax.0.weight'][0:2]=model.state_dict()['softmax.0.weight']
 A_model.state_dict()['softmax.0.bias'][0:2]=model.state_dict()['softmax.0.bias']
-output = model_A(datasets)
-output = output.to('cpu').detach().numpy().copy()
-pred_test = np.argmax(output,axis=1)
-print(accuracy_score(labels,pred_test)) # 0.96875
-_,output = A_model(datasets)
-output = output.to('cpu').detach().numpy().copy()
-pred_test = np.argmax(output,axis=1)
-print(accuracy_score(labels,pred_test)) # 0.4
