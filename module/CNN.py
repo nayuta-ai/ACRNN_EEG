@@ -29,3 +29,11 @@ class CNN(nn.Module):
         # c1 = c.reshape(800,-1)
         cd = self.dropout(c)
         return cd
+"""
+cn = CNN(1,32,384,32,45,1,1,75,10,40)
+params = 0
+for p in cn.parameters():
+    if p.requires_grad:
+        params += p.numel()
+print(params)#57640
+"""

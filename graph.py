@@ -23,3 +23,21 @@ def acc_graph(train_acc,test_acc):
     plt.grid()
     plt.savefig("./result/accuracy_graph.png")
     plt.show()
+
+def acc_graph(true_rank,fake_rank,rank_list,rank_list_reverse):
+    plt.figure(figsize=(8,6))
+    l = []
+    l_reverse = []
+    for i in rank_list:
+        l.append(true_rank[i-1])
+    for i in rank_list_reverse:
+        l_reverse.append(fake_rank[i-1])
+    plt.plot(l, label='true')
+    plt.plot(l_reverse, label='fake')
+    plt.title('Learning Curve of accuracy loss')
+    plt.legend(fontsize=14)
+    plt.xticks(size=14)
+    plt.yticks(size=14)
+    plt.grid()
+    plt.savefig("./result/accuracy_loss.png")
+    plt.show()

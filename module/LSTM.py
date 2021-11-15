@@ -19,3 +19,11 @@ class LSTM(nn.Module):
         h = hidden[1].reshape(-1,1,64)
         c = cell[1].reshape(-1,1,64)
         return h,c
+"""
+ls = LSTM(64)
+params = 0
+for p in ls.parameters():
+    if p.requires_grad:
+        params += p.numel()
+print(params)#326656
+"""

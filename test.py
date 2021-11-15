@@ -27,7 +27,7 @@ def deap_preprocess(data_file,emotion):
     # print(type(labels))
     return datasets, labels
 
-datasets, labels = deap_preprocess("s01","arousal")
+datasets, labels = deap_preprocess("s30","arousal")
 datasets = torch.from_numpy(datasets).clone()
 datasets = datasets.permute(0,3,1,2)
 
@@ -40,12 +40,18 @@ map,y_map,output = model(datasets)
 output = output.to('cpu').detach().numpy().copy()
 pred_test = np.argmax(output,axis=1)
 print(accuracy_score(labels,pred_test))
-
+params = 0
+for p in model.parameters():
+    if p.requires_grad:
+        params += p.numel()
+print(params)
+"""
 # channel_wise_attetion Survey
 map_T = map.permute(1,0)
 map_cw = torch.mean(map,axis=0)
 map_cw = map_cw.to('cpu').detach().numpy().copy()
 rank = rankdata(-map_cw)
+inverse_rank = rankdata(map_cw)
 index = ['FP1','AF3','F3','F7','FC5','FC1','C3','T7','CP5','CP1','P3','P7','PO3','O1','Oz','Pz','FP2','AF4','Fz','F4','F8','FC6','FC2','Cz','C4','T8','CP6','CP2','P4','P8','PO4','O2']
 data=[]       
 map_reshape = torch.reshape(torch.cat([map]*(1*384),axis=1),[-1,1,384,32])
@@ -53,6 +59,11 @@ for i in range(10):
     trans=np.where(rank==i+1)[0][0]
     data.append(index[trans])
 print(data)
+inverse_data=[]
+for i in range(10):
+    trans=np.where(inverse_rank==i+1)[0][0]
+    inverse_data.append(index[trans])
+print(inverse_data)
 plt.figure()
 plt.plot(index,map_cw)
 plt.grid()
@@ -79,20 +90,34 @@ model_A.state_dict()['self_attention.self_attention.1.bias'][0:64]=model.state_d
 model_A.state_dict()['softmax.0.weight'][0:2]=model.state_dict()['softmax.0.weight']
 model_A.state_dict()['softmax.0.bias'][0:2]=model.state_dict()['softmax.0.bias']
 min_index=np.where(rank==32)[0][0]
+#mean_data = torch.mean(map_T,axis=0)
 accuracy=[]
 accuracy.append(accuracy_score(labels,pred_test))
+inverse_accuracy=[]
+inverse_accuracy.append(accuracy_score(labels,pred_test))
 random_accuracy=[]
 random_accuracy.append(accuracy_score(labels,pred_test))
 random=map_T
+inverse=map_T
+print(random.shape)
 for i in range(32):
     trans=np.where(rank==i+1)[0][0]
+    inverse_trans=np.where(inverse_rank==i+1)[0][0]
     map_T[trans]=map_T[min_index]
+    #map_T[trans]=mean_data
     map_reshape=map_T.permute(1,0)
     map_reshape = torch.reshape(torch.cat([map_reshape]*(1*384),axis=1),[-1,1,384,32])
     random[i] = map_T[min_index]
-    random_reshape = torch.reshape(torch.cat([random]*(1*384),axis=1),[-1,1,384,32])
+    #random[i] = mean_data
+    random_reshape=random.permute(1,0)
+    random_reshape = torch.reshape(torch.cat([random_reshape]*(1*384),axis=1),[-1,1,384,32])
+    inverse[inverse_trans] = map_T[min_index]
+    #inverse[inverse_trans] = mean_data
+    inverse_reshape=inverse.permute(1,0)
+    inverse_reshape = torch.reshape(torch.cat([inverse_reshape]*(1*384),axis=1),[-1,1,384,32])
     data=map_reshape*datasets
     data_random = random_reshape*datasets
+    data_inverse = inverse_reshape*datasets
     output=model_A(data)
     output = output.to('cpu').detach().numpy().copy()
     pred = np.argmax(output,axis=1)
@@ -101,14 +126,21 @@ for i in range(32):
     output = output.to('cpu').detach().numpy().copy()
     pred = np.argmax(output,axis=1)
     random_accuracy.append(accuracy_score(labels,pred))
+    output=model_A(data_inverse)
+    output = output.to('cpu').detach().numpy().copy()
+    pred = np.argmax(output,axis=1)
+    inverse_accuracy.append(accuracy_score(labels,pred))
 plt.figure(figsize=(8,6))
 plt.plot(accuracy,label='True')
 plt.plot(random_accuracy,label='Random')
+plt.plot(inverse_accuracy,label='False')
 plt.title('Learning Curve of acc roar')
 plt.legend(fontsize=14)
 plt.xticks(size=14)
 plt.yticks(size=14)
 plt.grid()
+# not ROAR
+# Remove and Predict
 plt.savefig("./result/acc_roar_graph.png")
 plt.show()
 
@@ -150,3 +182,4 @@ plt.yticks(size=14)
 plt.grid()
 plt.savefig("./result/acc_roar_self_attention_graph.png")
 plt.show()
+"""

@@ -33,3 +33,11 @@ class channel_wise_attention(nn.Module):
         vr = torch.reshape(torch.cat([v]*(self.H*self.W),axis=1),[-1,self.H,self.W,self.C])
         channel_wise_attention_fm = x * vr
         return v, channel_wise_attention_fm
+"""
+ca = channel_wise_attention(1,384,32,15)
+params = 0
+for p in ca.parameters():
+    if p.requires_grad:
+        params += p.numel()
+print(params)#1007
+"""

@@ -43,3 +43,11 @@ class self_attention(nn.Module):
         A = A.reshape(-1,self.k)
         A = self.dropout(A)
         return p,A
+"""
+sa = self_attention(64,512)
+params = 0
+for p in sa.parameters():
+    if p.requires_grad:
+        params += p.numel()
+print(params)#16576
+"""
